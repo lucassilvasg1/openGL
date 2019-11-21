@@ -21,12 +21,6 @@ import com.jogamp.opengl.util.texture.TextureData;
 import com.jogamp.opengl.util.texture.TextureIO;
 
 
-/**
- * A minimal JOGL demo.
- * 
- * @author <a href="mailto:kain@land-of-kain.de">Kai Ruhl</a>
- * @since 26 Feb 2009
- */
 public class OpenGL extends GLCanvas implements GLEventListener {
 
     private static final long serialVersionUID = 1L;
@@ -48,7 +42,7 @@ public class OpenGL extends GLCanvas implements GLEventListener {
     }
 
     private static GLCapabilities createGLCapabilities() {
-       GLCapabilities capabilities = new GLCapabilities(GLProfile.get(GLProfile.GL2));
+        GLCapabilities capabilities = new GLCapabilities(GLProfile.get(GLProfile.GL2));
         capabilities.setRedBits(8);
         capabilities.setBlueBits(8);
         capabilities.setGreenBits(8);
@@ -79,7 +73,7 @@ public class OpenGL extends GLCanvas implements GLEventListener {
         // Load earth texture.
         try {
             InputStream stream = getClass().getResourceAsStream("earth_1024x512.jpg");
-            TextureData data = TextureIO.newTextureData(GLProfile.get(GLProfile.GL2), stream, false, "png");
+            TextureData data = TextureIO.newTextureData(GLProfile.get(GLProfile.GL2), stream, false, "jpg");
             earthTexture = TextureIO.newTexture(data);
         }
         catch (IOException exc) {
@@ -232,6 +226,45 @@ public class OpenGL extends GLCanvas implements GLEventListener {
         gl.glTexCoord2f(0.0f, 1.0f);
         gl.glVertex3fv(backLL, 0);
         gl.glEnd();
+        
+        // ----- Render the Pyramid -----
+        gl.glLoadIdentity();  // reset the model-view matrix
+        gl.glTranslatef(-30f, 0.0f, 0.0f); // translate left and into the screen
+
+        gl.glBegin(GL.GL_TRIANGLES); // of the pyramid
+        // Font-face triangle
+        gl.glColor3f(5.0f, 0.0f, 0.0f);  // Red
+        gl.glVertex3f(0.0f, 5.0f, 0.0f);
+        gl.glColor3f(0.0f, 5.0f, 0.0f);  // Green
+        gl.glVertex3f(-5.0f, -5.0f, 5.0f);
+        gl.glColor3f(0.0f, 0.0f, 5.0f);  // Blue
+        gl.glVertex3f(5.0f, -5.0f, 5.0f);
+
+        // Right-face triangle
+        gl.glColor3f(5.0f, 0.0f, 0.0f);  // Red
+        gl.glVertex3f(0.0f, 5.0f, 0.0f);
+        gl.glColor3f(0.0f, 0.0f, 5.0f);  // Blue
+        gl.glVertex3f(5.0f, -5.0f, 5.0f);
+        gl.glColor3f(0.0f, 5.0f, 0.0f);  // Green
+        gl.glVertex3f(5.0f, -5.0f, -5.0f);
+
+        // Back-face triangle
+        gl.glColor3f(5.0f, 0.0f, 0.0f);  // Red
+        gl.glVertex3f(0.0f, 5.0f, 0.0f);
+        gl.glColor3f(0.0f, 5.0f, 0.0f);  // Green
+        gl.glVertex3f(5.0f, -5.0f, -5.0f);
+        gl.glColor3f(0.0f, 0.0f, 5.0f);  // Blue
+        gl.glVertex3f(-5.0f, -5.0f, -5.0f);
+
+        // Left-face triangle
+        gl.glColor3f(5.0f, 0.0f, 0.0f);  // Red
+        gl.glVertex3f(0.0f, 5.0f, 0.0f);
+        gl.glColor3f(0.0f, 0.0f, 5.0f);  // Blue
+        gl.glVertex3f(-5.0f, -5.0f, -5.0f);
+        gl.glColor3f(0.0f, 5.0f, 0.0f);  // Green
+        gl.glVertex3f(-5.0f, -5.0f, 5.0f);
+
+        gl.glEnd(); // of the pyramid
 
         // Restore old state.
         gl.glPopMatrix();
@@ -270,9 +303,9 @@ public class OpenGL extends GLCanvas implements GLEventListener {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
         canvas.requestFocus();
+        
     }
 
-   @Override
    public void dispose(GLAutoDrawable drawable)
    {
    }
