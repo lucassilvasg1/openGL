@@ -31,8 +31,16 @@ public class OpenGL extends GLCanvas implements GLEventListener {
 
     private FPSAnimator animator;
 
+    
+    //textures here
     private Texture earthTexture;
-
+    private Texture sunTexture;
+    private Texture marsTexture;
+    // planets rotation angles
+    private float sunangle = 0;
+    private float marsangle = 0;
+    private float earthangle = 0;
+    private float ufoangle = 0;
     private float satelliteAngle = 0;
 
     private Texture solarPanelTexture;
@@ -54,7 +62,7 @@ public class OpenGL extends GLCanvas implements GLEventListener {
         drawable.setGL(new DebugGL2(drawable.getGL().getGL2()));
         final GL2 gl = drawable.getGL().getGL2();
 
-        // Enable z- (depth) buffer for hidden surface removal. 
+        // Enable z- (depth) buffer for hidden surface removal.
         gl.glEnable(GL.GL_DEPTH_TEST);
         gl.glDepthFunc(GL.GL_LEQUAL);
 
@@ -75,6 +83,28 @@ public class OpenGL extends GLCanvas implements GLEventListener {
             InputStream stream = getClass().getResourceAsStream("earth_1024x512.jpg");
             TextureData data = TextureIO.newTextureData(GLProfile.get(GLProfile.GL2), stream, false, "jpg");
             earthTexture = TextureIO.newTexture(data);
+        }
+        catch (IOException exc) {
+            exc.printStackTrace();
+            System.exit(1);
+        }
+
+        // Load sun texture.
+        try {
+            InputStream stream = getClass().getResourceAsStream("sun.jpg");
+            TextureData data = TextureIO.newTextureData(GLProfile.get(GLProfile.GL2), stream, false, "jpg");
+            sunTexture = TextureIO.newTexture(data);
+        }
+        catch (IOException exc) {
+            exc.printStackTrace();
+            System.exit(1);
+        }
+
+        // Load mars texture.
+        try {
+            InputStream stream = getClass().getResourceAsStream("mars.jpeg");
+            TextureData data = TextureIO.newTextureData(GLProfile.get(GLProfile.GL2), stream, false, "jpg");
+            marsTexture = TextureIO.newTexture(data);
         }
         catch (IOException exc) {
             exc.printStackTrace();
@@ -111,17 +141,17 @@ public class OpenGL extends GLCanvas implements GLEventListener {
 
         // Prepare light parameters.
         float SHINE_ALL_DIRECTIONS = 1;
-        float[] lightPos = {-30, 0, 0, SHINE_ALL_DIRECTIONS};
+        float[] lightPos = {0f, 0f, 1f, SHINE_ALL_DIRECTIONS};
         float[] lightColorAmbient = {0.2f, 0.2f, 0.2f, 1f};
         float[] lightColorSpecular = {0.8f, 0.8f, 0.8f, 1f};
-        float[] lightDiffuse = { 1f, 0f, 0f, 0f };           
+        float[] lightDiffuse = { 1f, 0f, 0f, 0f };
 
         // Set light parameters.
         gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_POSITION, lightPos, 0);
         gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_AMBIENT, lightColorAmbient, 0);
         gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_SPECULAR, lightColorSpecular, 0);
         gl.glLightfv( GL2.GL_LIGHT1, GL2.GL_DIFFUSE, lightDiffuse, 0 );
-        
+
         // Enable lighting in GL.
         gl.glEnable(GL2.GL_LIGHT1);
         gl.glEnable(GL2.GL_LIGHTING);
@@ -131,17 +161,33 @@ public class OpenGL extends GLCanvas implements GLEventListener {
         gl.glMaterialfv(GL.GL_FRONT, GL2.GL_AMBIENT, rgba, 0);
         gl.glMaterialfv(GL.GL_FRONT, GL2.GL_SPECULAR, rgba, 0);
         gl.glMaterialf(GL.GL_FRONT, GL2.GL_SHININESS, 0.5f);
-
+        //-----------------------------------------------------TERRA-----------------------------------------------------
         // Apply texture.
         earthTexture.enable(gl);
         earthTexture.bind(gl);
 
-        // Draw sphere (possible styles: FILL, LINE, POINT).
+        //EARTH Draw sphere (possible styles: FILL, LINE, POINT).
         GLUquadric earth = glu.gluNewQuadric();
         glu.gluQuadricTexture(earth, true);
         glu.gluQuadricDrawStyle(earth, GLU.GLU_FILL);
         glu.gluQuadricNormals(earth, GLU.GLU_FLAT);
         glu.gluQuadricOrientation(earth, GLU.GLU_OUTSIDE);
+
+
+
+        //rotating and translating
+        earthangle = earthangle+ ( (0.5f) % 360f);
+        final float distance = 10.000f;
+        final float xearth = (float) Math.sin(Math.toRadians(earthangle)) * (distance*10f) ;
+        final float yearth = (float) Math.cos(Math.toRadians(earthangle)) * (distance*10f);
+        final float zearth = 0;
+        gl.glTranslatef(xearth, yearth, zearth);
+        gl.glRotatef(earthangle, earthangle, earthangle, -1);
+
+
+
+
+
         final float radius = 6.378f;
         final int slices = 16;
         final int stacks = 16;
@@ -150,16 +196,156 @@ public class OpenGL extends GLCanvas implements GLEventListener {
 
         // Save old state.
         gl.glPushMatrix();
+         //Removing Earth from Matrix
+        gl.glPopMatrix();
+        //-----------------------------------------------------SOL-----------------------------------------------------
+    
+
+
+        //reloading matrix
+        gl.glLoadIdentity();
+
+
+        // Apply texture.
+        sunTexture.enable(gl);
+        sunTexture.bind(gl);
+
+        //rotate sun
+
+        sunangle =earthangle/27;
+
+        gl.glRotatef(earthangle, earthangle, earthangle, -1);
+
+
+
+        //SUN Draw sphere (possible styles: FILL, LINE, POINT).
+
+        GLUquadric sun = glu.gluNewQuadric();
+        glu.gluQuadricTexture(sun, true);
+        glu.gluQuadricDrawStyle(sun, GLU.GLU_FILL);
+        glu.gluQuadricNormals(sun, GLU.GLU_FLAT);
+        glu.gluQuadricOrientation(sun, GLU.GLU_OUTSIDE);
+    
+        final float radiusSun = 50f;
+        final int slicesSun = 16;
+        final int stacksSun = 16;
+        glu.gluSphere(sun, radiusSun, slicesSun, stacksSun);
+        glu.gluDeleteQuadric(sun);
+        // Save old state.
+        gl.glPushMatrix();
+        //--------------------------------------------------FIM SOL------------------------------------------------
+
+
+        //-----------------------------------------------------Mars-----------------------------------------------------
+        // Apply texture.
+
+
+        //Removing sun from Matrix
+        gl.glPopMatrix();
+
+        gl.glLoadIdentity();
+
+
+        // Compute mars position
+        
+        marsangle = earthangle /2;
+
+        final float xMars = (float) Math.sin(Math.toRadians(satelliteAngle)) * distance*12.5f;
+        final float yMars = (float) Math.cos(Math.toRadians(satelliteAngle)) * distance*12.5f;
+        final float zMars = 0;
+        gl.glTranslatef(xMars, yMars, zMars);
+        gl.glRotatef(satelliteAngle, 0, 0, -1);
+
+
+        marsTexture.enable(gl);
+        marsTexture.bind(gl);
+        //mars Draw sphere (possible styles: FILL, LINE, POINT).
+
+        GLUquadric mars = glu.gluNewQuadric();
+        glu.gluQuadricTexture(mars, true);
+        glu.gluQuadricDrawStyle(mars, GLU.GLU_FILL);
+        glu.gluQuadricNormals(mars, GLU.GLU_FLAT);
+        glu.gluQuadricOrientation(mars, GLU.GLU_OUTSIDE);
+        final float radiusMars = 5;
+        final int slicesMars = 16;
+        final int stacksMars = 16;
+        glu.gluSphere(mars, radiusMars, slicesMars, stacksMars);
+        glu.gluDeleteQuadric(mars);
+        // Save old state.
+        gl.glPushMatrix();
+
+
+
+
+
+
+//--------------------------------------------------FIM mars------------------------------------------------
+
+//-----------------------------------------------------UFO-----------------------------------------------------
+        // Apply texture.
+
+
+        //Removing MARS from Matrix
+        gl.glPopMatrix();
+
+        gl.glLoadIdentity();
+
+        gl.glColor3f(100, 50, 50);
+        // Compute UFO position
+        
+        ufoangle = earthangle /2;
+
+         final float xUfo = (float) Math.sin(Math.toRadians(ufoangle)) * distance*6f;
+         final float yUfo = (float) Math.cos(Math.toRadians(ufoangle)) * distance*6f;
+         final float zUfo = 0;
+        gl.glTranslatef(xUfo, yUfo, 50);
+    
+         //rotate sun
+
+         sunangle =earthangle/27;
+
+         gl.glRotatef(ufoangle,ufoangle, ufoangle, -1);
+
+
+        //ufoTexture.enable(gl);
+        //ufoTexture.bind(gl);
+        //mars Draw sphere (possible styles: FILL, LINE, POINT).
+        final float ufoRadius = 5f;
+        final float ufoHeight = 2f;
+        final int ufoSlices = 16;
+        final int ufoStacks = 16;
+        GLUquadric ufo = glu.gluNewQuadric();
+        glu.gluQuadricTexture(ufo, false);
+        glu.gluQuadricDrawStyle(ufo, GLU.GLU_FILL);
+        glu.gluQuadricNormals(ufo, GLU.GLU_FLAT);
+        glu.gluQuadricOrientation(ufo, GLU.GLU_OUTSIDE);
+        gl.glTranslatef(0, 0, -ufoHeight / 2);
+        glu.gluDisk(ufo, 0, ufoRadius, ufoSlices, 2);
+        gl.glTranslatef(0, 0, ufoHeight);
+        glu.gluDisk(ufo, 0, ufoRadius, ufoSlices, 2);
+        glu.gluDeleteQuadric(ufo);
+        gl.glTranslatef(0, 0, -ufoHeight / 2);
+         // Save old state.
+        gl.glPushMatrix();
+
+
+       //--------------------------------------------------FIM UFO------------------------------------------------
+
+
+
+
+        // --------------- Satelite--------------------------
+        // Reseting position that was defined in sun so the satellite generates in 0,0,0
+        gl.glLoadIdentity();
 
         // Compute satellite position.
         satelliteAngle = (satelliteAngle + 1f) % 360f;
-        final float distance = 10.000f;
-        final float x = (float) Math.sin(Math.toRadians(satelliteAngle)) * distance;
-        final float y = (float) Math.cos(Math.toRadians(satelliteAngle)) * distance;
-        final float z = 0;
-        gl.glTranslatef(x, y, z);
+
+        final float xsat = (float) Math.sin(Math.toRadians(satelliteAngle)) * distance;
+        final float ysat = (float) Math.cos(Math.toRadians(satelliteAngle)) * distance;
+        final float zsat = 0;
+        gl.glTranslatef(xearth+xsat, yearth+ysat, zearth+zsat);
         gl.glRotatef(satelliteAngle, 0, 0, -1);
-        gl.glRotatef(45f, 0, 1, 0);
 
         // Set silver color, and disable texturing.
         gl.glDisable(GL.GL_TEXTURE_2D);
@@ -192,7 +378,7 @@ public class OpenGL extends GLCanvas implements GLEventListener {
         gl.glMaterialfv(GL.GL_FRONT, GL2.GL_AMBIENT, rgba, 0);
         gl.glMaterialfv(GL.GL_FRONT, GL2.GL_SPECULAR, rgba, 0);
         gl.glMaterialf(GL.GL_FRONT, GL2.GL_SHININESS, 0f);
-
+        
         // Draw solar panels.
         gl.glScalef(6f, 0.7f, 0.1f);
         solarPanelTexture.bind(gl);
@@ -226,48 +412,14 @@ public class OpenGL extends GLCanvas implements GLEventListener {
         gl.glTexCoord2f(0.0f, 1.0f);
         gl.glVertex3fv(backLL, 0);
         gl.glEnd();
-        
-        // ----- Render the Pyramid -----
-        gl.glLoadIdentity();  // reset the model-view matrix
-        gl.glTranslatef(-30f, 0.0f, 0.0f); // translate left and into the screen
-
-        gl.glBegin(GL.GL_TRIANGLES); // of the pyramid
-        // Font-face triangle
-        gl.glColor3f(5.0f, 0.0f, 0.0f);  // Red
-        gl.glVertex3f(0.0f, 5.0f, 0.0f);
-        gl.glColor3f(0.0f, 5.0f, 0.0f);  // Green
-        gl.glVertex3f(-5.0f, -5.0f, 5.0f);
-        gl.glColor3f(0.0f, 0.0f, 5.0f);  // Blue
-        gl.glVertex3f(5.0f, -5.0f, 5.0f);
-
-        // Right-face triangle
-        gl.glColor3f(5.0f, 0.0f, 0.0f);  // Red
-        gl.glVertex3f(0.0f, 5.0f, 0.0f);
-        gl.glColor3f(0.0f, 0.0f, 5.0f);  // Blue
-        gl.glVertex3f(5.0f, -5.0f, 5.0f);
-        gl.glColor3f(0.0f, 5.0f, 0.0f);  // Green
-        gl.glVertex3f(5.0f, -5.0f, -5.0f);
-
-        // Back-face triangle
-        gl.glColor3f(5.0f, 0.0f, 0.0f);  // Red
-        gl.glVertex3f(0.0f, 5.0f, 0.0f);
-        gl.glColor3f(0.0f, 5.0f, 0.0f);  // Green
-        gl.glVertex3f(5.0f, -5.0f, -5.0f);
-        gl.glColor3f(0.0f, 0.0f, 5.0f);  // Blue
-        gl.glVertex3f(-5.0f, -5.0f, -5.0f);
-
-        // Left-face triangle
-        gl.glColor3f(5.0f, 0.0f, 0.0f);  // Red
-        gl.glVertex3f(0.0f, 5.0f, 0.0f);
-        gl.glColor3f(0.0f, 0.0f, 5.0f);  // Blue
-        gl.glVertex3f(-5.0f, -5.0f, -5.0f);
-        gl.glColor3f(0.0f, 5.0f, 0.0f);  // Green
-        gl.glVertex3f(-5.0f, -5.0f, 5.0f);
-
-        gl.glEnd(); // of the pyramid
-
-        // Restore old state.
         gl.glPopMatrix();
+        
+//------------------- end satelite---------------------
+
+
+
+
+
     }
 
     public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
@@ -287,7 +439,7 @@ public class OpenGL extends GLCanvas implements GLEventListener {
         // Perspective.
         float widthHeightRatio = (float) getWidth() / (float) getHeight();
         glu.gluPerspective(45, widthHeightRatio, 1, 1000);
-        glu.gluLookAt(0, 0, distance, 0, 0, 0, 0, 1, 0);
+        glu.gluLookAt(30, 0, distance*6f, 0, 0, 0, 0, 1, 0);
 
         // Change back to model view matrix.
         gl.glMatrixMode(GL2.GL_MODELVIEW);
@@ -303,11 +455,11 @@ public class OpenGL extends GLCanvas implements GLEventListener {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
         canvas.requestFocus();
-        
+
     }
 
-   public void dispose(GLAutoDrawable drawable)
-   {
-   }
+    public void dispose(GLAutoDrawable drawable)
+    {
+    }
 
 }
